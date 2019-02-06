@@ -322,6 +322,20 @@ else:
   return true;
 }
 
+static bool get_serialized_length(unsigned int * expected_length)
+{
+  __dds_msg_type dds_message;
+
+  // call the serialize function for the first time to get the expected length of the message
+  if (@(spec.base_type.type)_Plugin_serialize_to_cdr_buffer(
+     NULL, expected_length, &dds_message) != RTI_TRUE)
+  {
+    fprintf(stderr, "failed to call @(spec.base_type.type)_Plugin_serialize_to_cdr_buffer()\n");
+    return false;
+  }
+
+ return true;
+}
 
 static bool
 to_cdr_stream(
@@ -348,6 +362,10 @@ to_cdr_stream(
     fprintf(stderr, "failed to call @(spec.base_type.type)_Plugin_serialize_to_cdr_buffer()\n");
     return false;
   }
+
+
+  printf("EXPECTED LENGTH INTO TO_CDR_STREAM : %u\n", expected_length);
+
   cdr_stream->buffer_length = expected_length;
   if (cdr_stream->buffer_length > (std::numeric_limits<unsigned int>::max)()) {
     fprintf(stderr, "cdr_stream->buffer_length, unexpectedly larger than max unsigned int\n");
@@ -413,6 +431,7 @@ static message_type_support_callbacks_t __callbacks = {
   convert_ros_to_dds,  // convert_ros_to_dds
   convert_dds_to_ros,  // convert_dds_to_ros
   to_cdr_stream,  // to_cdr_stream
+  get_serialized_length, //get_serialized_length
   to_message  // to_message
 };
 

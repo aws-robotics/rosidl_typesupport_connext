@@ -300,6 +300,7 @@ static message_type_support_callbacks_t callbacks = {
   nullptr,
   nullptr,
   &to_cdr_stream__@(spec.base_type.type),
+  nullptr,
   &to_message__@(spec.base_type.type)
 };
 

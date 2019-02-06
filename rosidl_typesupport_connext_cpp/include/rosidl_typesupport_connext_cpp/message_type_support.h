@@ -38,6 +38,9 @@ typedef struct message_type_support_callbacks_t
   bool (* to_cdr_stream)(
     const void * untyped_ros_message,
     rcutils_uint8_array_t * cdr_stream);
+  // Function to serialize a ROS message to a CDR stream
+  bool (* get_serialized_length)(
+    unsigned int * expected_size);
   // Function to deserialize a CDR message to a ROS message
   bool (* to_message)(
     const rcutils_uint8_array_t * cdr_stream,
