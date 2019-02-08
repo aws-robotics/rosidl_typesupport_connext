@@ -322,7 +322,7 @@ else:
   return true;
 }
 
-static bool get_serialized_length(unsigned int * expected_length)
+static rmw_ret_t get_serialized_length(unsigned int * expected_length)
 {
   __dds_msg_type dds_message;
 
@@ -330,11 +330,11 @@ static bool get_serialized_length(unsigned int * expected_length)
   if (@(spec.base_type.type)_Plugin_serialize_to_cdr_buffer(
      NULL, expected_length, &dds_message) != RTI_TRUE)
   {
-    fprintf(stderr, "failed to call @(spec.base_type.type)_Plugin_serialize_to_cdr_buffer()\n");
-    return false;
+    RMW_SET_ERROR_MSG("failed to call @(spec.base_type.type)_Plugin_serialize_to_cdr_buffer()");
+    return RMW_RET_ERROR;
   }
 
- return true;
+ return RMW_RET_OK;
 }
 
 static bool
@@ -362,9 +362,6 @@ to_cdr_stream(
     fprintf(stderr, "failed to call @(spec.base_type.type)_Plugin_serialize_to_cdr_buffer()\n");
     return false;
   }
-
-
-  printf("EXPECTED LENGTH INTO TO_CDR_STREAM : %u\n", expected_length);
 
   cdr_stream->buffer_length = expected_length;
   if (cdr_stream->buffer_length > (std::numeric_limits<unsigned int>::max)()) {
