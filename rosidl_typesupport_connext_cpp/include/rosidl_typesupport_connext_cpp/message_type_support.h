@@ -19,6 +19,8 @@
 
 #include "rosidl_generator_c/message_type_support_struct.h"
 
+#include "rmw/types.h"
+
 // forward declare DDS_TypeCode
 struct DDS_TypeCode;
 
@@ -39,7 +41,7 @@ typedef struct message_type_support_callbacks_t
     const void * untyped_ros_message,
     rcutils_uint8_array_t * cdr_stream);
   // Function to serialize a ROS message to a CDR stream
-  bool (* get_serialized_length)(
+  rmw_ret_t (* get_serialized_length)(
     unsigned int * expected_size);
   // Function to deserialize a CDR message to a ROS message
   bool (* to_message)(

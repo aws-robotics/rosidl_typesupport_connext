@@ -26,6 +26,9 @@
 
 #include "rcutils/types/uint8_array.h"
 
+#include "rmw/types.h"
+#include "rmw/impl/cpp/macros.hpp"
+
 // Provides the rosidl_typesupport_connext_c__identifier symbol declaration.
 #include "rosidl_typesupport_connext_c/identifier.h"
 // Provides the definition of the message_type_support_callbacks_t struct.
