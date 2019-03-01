@@ -42,11 +42,15 @@ typedef struct message_type_support_callbacks_t
     rcutils_uint8_array_t * cdr_stream);
   // Function to serialize a ROS message to a CDR stream
   rmw_ret_t (* get_serialized_length)(
+    void * untyped_data_message,
     unsigned int * expected_size);
+  rmw_ret_t ( * create_message)( void **, const void *);
+  rmw_ret_t (* delete_message)( void *);
   // Function to deserialize a CDR message to a ROS message
   bool (* to_message)(
     const rcutils_uint8_array_t * cdr_stream,
-    void * untyped_ros_message);
+    void * untyped_ros_message,
+    void * untyped_dds_message);
 } message_type_support_callbacks_t;
 
 #endif  // ROSIDL_TYPESUPPORT_CONNEXT_CPP__MESSAGE_TYPE_SUPPORT_H_

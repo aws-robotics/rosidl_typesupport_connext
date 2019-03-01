@@ -257,7 +257,7 @@ to_cdr_stream__@(spec.base_type.type)(
 bool
 to_message__@(spec.base_type.type)(
   const rcutils_uint8_array_t * cdr_stream,
-  void * untyped_ros_message)
+  void * untyped_ros_message, void * untyped_dds_message)
 {
   if (!cdr_stream) {
     return false;
@@ -300,6 +300,8 @@ static message_type_support_callbacks_t callbacks = {
   nullptr,
   nullptr,
   &to_cdr_stream__@(spec.base_type.type),
+  nullptr,
+  nullptr,
   nullptr,
   &to_message__@(spec.base_type.type)
 };

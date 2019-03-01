@@ -38,6 +38,7 @@
 @{header_file_name = get_header_filename_from_msg_name(type)}@
 #include "@(pkg)/@(subfolder)/@(header_file_name)__struct.h"
 #include "@(pkg)/@(subfolder)/@(header_file_name)__functions.h"
+#include "@(pkg)/@(subfolder)/@(header_file_name)__bounds.h"
 
 #ifndef _WIN32
 # pragma GCC diagnostic push
@@ -325,13 +326,29 @@ else:
   return true;
 }
 
-static rmw_ret_t get_serialized_length(unsigned int * expected_length)
+static rmw_ret_t get_serialized_length(void * dds_msg, unsigned int * expected_length)
 {
-  __dds_msg_type dds_message;
+
+ __dds_msg_type * dds_message = static_cast<__dds_msg_type * >(dds_msg);
+
+@[for field in spec.fields]@
+// Field name: @(field.name)
+// Field name: @(msg)
+// Field name: @(field.type.type)
+// Field name: @(field.type.is_array)
+@[  if msg=='UnboundedInt32Array' and field.name == 'int32_values' and field.type.is_array and field.type.type == "int32" ]@
+printf("Length   : %d  \n", DDS_LongSeq_get_length(&dds_message->int32_values_));
+printf("Maximum   : %d  \n", DDS_LongSeq_get_maximum(&dds_message->int32_values_));
+ bool has_own = DDS_LongSeq_has_ownership(&dds_message->int32_values_);
+ printf("HAS OWN    !!   : %d  \n", has_own);
+  printf("Length   : %d  \n", DDS_LongSeq_get_length(&dds_message->int32_values_));
+ printf("Maximum   : %d  \n", DDS_LongSeq_get_maximum(&dds_message->int32_values_));
+@[end if ]@
+@[end for]@
 
   // call the serialize function for the first time to get the expected length of the message
   if (@(spec.base_type.type)_Plugin_serialize_to_cdr_buffer(
-     NULL, expected_length, &dds_message) != RTI_TRUE)
+     NULL, expected_length, dds_message) != RTI_TRUE)
   {
     RMW_SET_ERROR_MSG("failed to call @(spec.base_type.type)_Plugin_serialize_to_cdr_buffer()");
     return RMW_RET_ERROR;
@@ -388,10 +405,119 @@ to_cdr_stream(
   return true;
 }
 
+static rmw_ret_t create_message(void ** msg, const void * bounds)
+{
+
+  const @(spec.base_type.pkg_name)__@(subfolder)__@(spec.base_type.type)__bounds  * bound = static_cast<const @(spec.base_type.pkg_name)__@(subfolder)__@(spec.base_type.type)__bounds  *>(bounds);
+  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ * dds_message = @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_TypeSupport::create_data();
+
+@{
+unbounded_fields = []
+for field in spec.fields:
+    field.is_string_array = False
+    field.is_primitive_array = False
+    if field.type.is_array and not field.type.array_size and not field.type.is_upper_bound:
+      if field.type.type == 'string':
+          field.is_string_array = True
+      elif field.type.is_primitive_type():
+          field.is_primitive_array = True
+      else:
+          field.is_compound_array = True
+      unbounded_fields.append(field)
+}@
+@[for field in unbounded_fields]@
+@[  if field.is_string_array]@
+   DDS_StringSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+    bound->@(field.name)__length);
+   for(size_t i = 0; i < bound->@(field.name)__length; i++){
+    dds_message->@(field.name)_[i] = DDS_String_alloc(bound->@(field.name)__bounds.bounds);
+   }
+@[  elif field.is_primitive_array]@
+  @[   if field.type.type == "bool"]@
+   DDS_BooleanSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+    bound->@(field.name)__length);
+  @[ elif field.type.type == "byte"]@
+   DDS_OctetSeq_ensure_length(&dds_message->@(field.name)_,
+   bound->@(field.name)__length,
+   bound->@(field.name)__length );
+  @[ elif field.type.type == "char"]@
+   DDS_CharSeq_ensure_length(&dds_message->@(field.name)_,
+   bound->@(field.name)__length,
+   bound->@(field.name)__length );
+  @[ elif field.type.type == "float32"]@
+   DDS_FloatSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+     bound->@(field.name)__length );
+  @[ elif field.type.type == "float64"]@
+   DDS_DoubleSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+     bound->@(field.name)__length );
+  @[ elif field.type.type == "int8"]@
+   DDS_OctetSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+     bound->@(field.name)__length );
+  @[ elif field.type.type == "uint8"]@
+   DDS_OctetSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+     bound->@(field.name)__length );
+  @[ elif field.type.type == "int16"]@
+   DDS_ShortSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+     bound->@(field.name)__length );
+  @[ elif field.type.type == "uint16"]@
+   DDS_UnsignedShortSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+     bound->@(field.name)__length );
+  @[ elif field.type.type == "int32"]@
+   DDS_LongSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+     bound->@(field.name)__length );
+  @[ elif field.type.type == "uint32"]@
+   DDS_UnsignedLongSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+     bound->@(field.name)__length );
+  @[ elif field.type.type == "int64"]@
+   DDS_LongLongSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+     bound->@(field.name)__length );
+  @[ elif field.type.type == "uint64"]@
+   DDS_UnsignedLongLongSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
+     bound->@(field.name)__length );
+  @[ end if]@
+@[ elif field.is_compound_array]@
+
+@[ end if]@
+@[end for]@
+
+*msg = (void *) dds_message;
+
+  return RMW_RET_OK;
+}
+
+static rmw_ret_t delete_message(void * msg)
+{
+
+  if(!msg){
+    RMW_SET_ERROR_MSG("msg cannot be null");
+    return RMW_RET_ERROR;
+  }
+
+  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ * dds_message = static_cast<@(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ * >(msg);
+  if (@(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_TypeSupport::delete_data( dds_message) != DDS_RETCODE_OK) {
+    RMW_SET_ERROR_MSG("msg cannot be null");
+    return RMW_RET_ERROR;
+  }
+  return RMW_RET_OK;
+}
+
 static bool
 to_message(
   const rcutils_uint8_array_t * cdr_stream,
-  void * untyped_ros_message)
+  void * untyped_ros_message,
+  void * untyped_dds_message)
 {
   if (!cdr_stream) {
     return false;
@@ -400,8 +526,14 @@ to_message(
     return false;
   }
 
-  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ * dds_message =
+  @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ * dds_message;
+  if (untyped_dds_message) {
+    dds_message = static_cast<@(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_ * >(untyped_dds_message);
+  } else {
+    dds_message =
     @(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_TypeSupport::create_data();
+  }
+
   if (cdr_stream->buffer_length > (std::numeric_limits<unsigned int>::max)()) {
     fprintf(stderr, "cdr_stream->buffer_length, unexpectedly larger than max unsigned int\n");
     return false;
@@ -415,8 +547,11 @@ to_message(
     return false;
   }
   bool success = convert_dds_to_ros(dds_message, untyped_ros_message);
-  if (@(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_TypeSupport::delete_data(dds_message) != DDS_RETCODE_OK) {
-    return false;
+
+  if(!untyped_dds_message){
+    if (@(spec.base_type.pkg_name)::@(subfolder)::dds_::@(spec.base_type.type)_TypeSupport::delete_data(dds_message) != DDS_RETCODE_OK) {
+      return false;
+      }
   }
   return success;
 }
@@ -432,6 +567,8 @@ static message_type_support_callbacks_t __callbacks = {
   convert_dds_to_ros,  // convert_dds_to_ros
   to_cdr_stream,  // to_cdr_stream
   get_serialized_length, //get_serialized_length
+  create_message, //create_message
+  delete_message, // delete_message
   to_message  // to_message
 };
 
