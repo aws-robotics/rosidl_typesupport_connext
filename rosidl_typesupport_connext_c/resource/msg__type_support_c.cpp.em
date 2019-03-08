@@ -435,78 +435,64 @@ const @(spec.base_type.pkg_name)__@(subfolder)__@(spec.base_type.type)__bounds  
 @[end if]@
 @[for field in unbounded_fields]@
 @[  if field.is_string_array]@
-   //DDS_StringSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_StringSeq_set_maximum(&dds_message->@(field.name)_,
-//    bound->@(field.name)__length,
+  DDS_StringSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
     bound->@(field.name)__length);
    for(size_t i = 0; i < bound->@(field.name)__length; i++){
     dds_message->@(field.name)_[i] = DDS_String_alloc(bound->@(field.name)__bounds.bounds);
    }
 @[  elif field.is_primitive_array]@
   @[   if field.type.type == "bool"]@
-   //DDS_BooleanSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_BooleanSeq_set_maximum(&dds_message->@(field.name)_,
-//    bound->@(field.name)__length,
+   DDS_BooleanSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
     bound->@(field.name)__length);
   @[ elif field.type.type == "byte"]@
-   //DDS_OctetSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_OctetSeq_set_maximum(&dds_message->@(field.name)_,
-  // bound->@(field.name)__length,
+  DDS_OctetSeq_ensure_length(&dds_message->@(field.name)_,
+   bound->@(field.name)__length,
    bound->@(field.name)__length );
   @[ elif field.type.type == "char"]@
-   //DDS_CharSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_CharSeq_set_maximum(&dds_message->@(field.name)_,
-  // bound->@(field.name)__length,
+  DDS_CharSeq_ensure_length(&dds_message->@(field.name)_,
+   bound->@(field.name)__length,
    bound->@(field.name)__length );
   @[ elif field.type.type == "float32"]@
-   //DDS_FloatSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_FloatSeq_set_maximum(&dds_message->@(field.name)_,
-    //bound->@(field.name)__length,
+  DDS_FloatSeq_ensure_length(&dds_message->@(field.name)_,
+  bound->@(field.name)__length,
      bound->@(field.name)__length );
   @[ elif field.type.type == "float64"]@
-   //DDS_DoubleSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_DoubleSeq_set_maximum(&dds_message->@(field.name)_,
-  //  bound->@(field.name)__length,
+  DDS_DoubleSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
      bound->@(field.name)__length );
   @[ elif field.type.type == "int8"]@
-   //DDS_OctetSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_OctetSeq_set_maximum(&dds_message->@(field.name)_,
-  //  bound->@(field.name)__length,
+  DDS_OctetSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
      bound->@(field.name)__length );
   @[ elif field.type.type == "uint8"]@
-   //DDS_OctetSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_OctetSeq_set_maximum(&dds_message->@(field.name)_,
-//    bound->@(field.name)__length,
+  DDS_OctetSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
      bound->@(field.name)__length );
   @[ elif field.type.type == "int16"]@
-   //DDS_ShortSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_ShortSeq_set_maximum(&dds_message->@(field.name)_,
-//    bound->@(field.name)__length,
+  DDS_ShortSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
      bound->@(field.name)__length );
   @[ elif field.type.type == "uint16"]@
-   //DDS_UnsignedShortSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_UnsignedShortSeq_set_maximum(&dds_message->@(field.name)_,
-//    bound->@(field.name)__length,
+  DDS_UnsignedShortSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
      bound->@(field.name)__length );
   @[ elif field.type.type == "int32"]@
-   //DDS_LongSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_LongSeq_set_maximum(&dds_message->@(field.name)_,
-//    bound->@(field.name)__length,
+   DDS_LongSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
      bound->@(field.name)__length );
   @[ elif field.type.type == "uint32"]@
-   //DDS_UnsignedLongSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_UnsignedLongSeq_set_maximum(&dds_message->@(field.name)_,
-//    bound->@(field.name)__length,
+   DDS_UnsignedLongSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
      bound->@(field.name)__length );
   @[ elif field.type.type == "int64"]@
-   //DDS_LongLongSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_LongLongSeq_set_maximum(&dds_message->@(field.name)_,
-//    bound->@(field.name)__length,
+   DDS_LongLongSeq_ensure_length(&dds_message->@(field.name)_,
+    bound->@(field.name)__length,
      bound->@(field.name)__length );
   @[ elif field.type.type == "uint64"]@
-   //DDS_UnsignedLongLongSeq_ensure_length(&dds_message->@(field.name)_,
-   DDS_UnsignedLongLongSeq_set_maximum(&dds_message->@(field.name)_,
-//    bound->@(field.name)__length,
+   DDS_UnsignedLongLongSeq_ensure_length(&dds_message->@(field.name)_,
+     bound->@(field.name)__length,
      bound->@(field.name)__length );
   @[ end if]@
 @[ elif field.is_compound_array]@
